@@ -1,0 +1,6 @@
+.Packages
+.Packages/*
+.Logs
+.Logs/*
+.Library
+.Library/*

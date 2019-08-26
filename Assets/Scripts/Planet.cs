@@ -50,14 +50,21 @@ public class Planet : MonoBehaviour
     // These public parameters can be tweaked to give different styles to your planet.
 
     public Material m_Material;
+    public GameObject location;
 
     public int m_NumberOfContinents = 5;
     public float m_ContinentSizeMax = 1.0f;
     public float m_ContinentSizeMin = 0.1f;
 
     public int m_NumberOfHills = 5;
+
+
     public float m_HillSizeMax = 1.0f;
     public float m_HillSizeMin = 0.1f;
+
+    public int m_NumberOfShops = 5;
+    public float m_shopRangeMin = 5.0f;
+
 
     // Internally, the Planet object stores its mesh as a child GameObject:
     GameObject m_PlanetMesh;
@@ -71,30 +78,27 @@ public class Planet : MonoBehaviour
     Color32 colorGrass = new Color32(0, 220, 0, 0);
     Color32 colorDirt = new Color32(180, 140, 20, 0);
 
+    PolySet landPolys = new PolySet();
+    PolySet hillPolys = new PolySet();
+
+    PolySet water = new PolySet();
+
     public void Start()
     {
         // Create an icosahedron, subdivide it three times so that we have plenty of polys
         // to work with.
-
         CreateIcoSphere();
-        Subdivide(3);
-
+        Subdivide(4);
         // When we begin extruding polygons, we'll need each one to know who its immediate
-        //neighbors are. Calculate that now.
-
+        //neighbors are.
         CalculateNeighbors();
-
-        // By default, everything is colored blue. As we extrude land forms, we'll change their colors to match.
+        // By default, everything is colored blue.
 
         foreach (Polygon p in m_Polygons)
             p.m_Color = colorOcean;
 
-        // Now we build a set of Polygons that will become the land. We do this by generating
         // randomly sized spheres on the surface of the planet, and adding any Polygon that falls
         // inside that sphere.
-
-        PolySet landPolys = new PolySet();
-
         for (int i = 0; i < m_NumberOfContinents; i++)
         {
             float continentSize = Random.Range(m_ContinentSizeMin, m_ContinentSizeMax);
@@ -124,7 +128,7 @@ public class Planet : MonoBehaviour
 
         // Grab additional polygons to generate hills, but only from the set of polygons that are land.
 
-        PolySet hillPolys = new PolySet();
+
 
         for (int i = 0; i < m_NumberOfHills; i++)
         {
@@ -145,8 +149,31 @@ public class Planet : MonoBehaviour
         // Okay, we're done! Let's generate an actual game mesh for this planet.
 
         GenerateMesh();
+        GetWaterPolygons();
+        SpawnShops(water);
     }
 
+    public void Update()
+    {
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            m_PlanetMesh.transform.rotation *= Quaternion.AngleAxis(60, Vector3.up);
+        }
+        m_PlanetMesh.transform.rotation = Quaternion.Lerp(transform.rotation, m_PlanetMesh.transform.rotation, 10 * 1.0f * Time.deltaTime);
+    }
+
+
+    public void GetWaterPolygons()
+    {
+        foreach (Polygon poly in m_Polygons)
+        {
+            if (!hillPolys.Contains(poly) && !landPolys.Contains(poly))
+            {
+                water.Add(poly);
+            }
+        }
+    }
 
     public void CreateIcoSphere()
     {
@@ -252,7 +279,7 @@ public class Planet : MonoBehaviour
         if (m_PlanetMesh)
             Destroy(m_PlanetMesh);
 
-        m_PlanetMesh = new GameObject("Planet Mesh");
+        m_PlanetMesh = new GameObject("PlanetMesh");
 
         MeshRenderer surfaceRenderer = m_PlanetMesh.AddComponent<MeshRenderer>();
         surfaceRenderer.material = m_Material;
@@ -312,6 +339,73 @@ public class Planet : MonoBehaviour
         terrainFilter.mesh = terrainMesh;
     }
 
+    bool checkShopDistance(Vector3 shopToPlace, List<Vector3> _shops)
+    {
+
+        foreach (Vector3 shop in _shops)
+        {
+            if (Vector3.Distance(shop, shopToPlace) < m_shopRangeMin)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void SpawnShops(PolySet water)
+    {
+        List<Vector3> shops = new List<Vector3>();
+        List<Polygon> _water = new List<Polygon>(water);
+        for (int i = 0; i < m_NumberOfShops; i++)
+        {
+
+            Polygon poly = _water[Random.Range(0, water.Count)];
+            Vector3 ab = m_Vertices[poly.m_Vertices[1]] - m_Vertices[poly.m_Vertices[0]];
+            Vector3 ac = m_Vertices[poly.m_Vertices[2]] - m_Vertices[poly.m_Vertices[0]];
+
+            Vector3 normal = Vector3.Cross(ab, ac).normalized;
+
+            Vector3 shopToPlace = m_PlanetMesh.transform.TransformPoint(normal);
+            if (checkShopDistance(shopToPlace, shops))
+            {
+                shops.Add(shopToPlace);
+            }
+            else
+            {
+                i--;
+            }
+
+        }
+
+        for (int i = 0; i < m_NumberOfShops; i++)
+        {
+            Object.Instantiate(location, shops[i], new Quaternion(0, 0, 0, 0), m_PlanetMesh.transform);
+        }
+
+        // Mesh mesh = m_PlanetMesh.GetComponent<MeshFilter>().mesh;
+        // Vector3[] verts = mesh.vertices;
+        // Vector3 worldPt = transform.TransformPoint(verts[0]);
+
+        // Object.Instantiate(location, worldPt, new Quaternion(0,0,0,0) ,m_PlanetMesh.transform);
+
+        // // foreach (Polygon poly in m_Polygons)
+        // // {
+        // //     if (!hillPolys.Contains(poly) && !landPolys.Contains(poly)){
+        // //         p
+        // //     }
+        // // }
+
+    }
+    // public void RandomizeTerrain()
+    // {
+
+    //    List<int> terrainverts = landPolys.GetUniqueVertices();
+
+    //    foreach(int v in terrainverts){
+    //        v
+    //    }
+    // }
+
     public List<int> GetUniqueVertices()
     {
         List<int> verts = new List<int>();
@@ -343,9 +437,7 @@ public class Planet : MonoBehaviour
 
     }
 
-    public PolySet GetPolysInSphere(Vector3 center,
-                                  float radius,
-                                  IEnumerable<Polygon> source)
+    public PolySet GetPolysInSphere(Vector3 center, float radius, IEnumerable<Polygon> source)
     {
         PolySet newSet = new PolySet();
         foreach (Polygon p in source)
@@ -365,29 +457,29 @@ public class Planet : MonoBehaviour
         return newSet;
     }
 
-    public PolySet Inset(PolySet polys, float interpolation)
-    {
-        PolySet stitchedPolys = StitchPolys(polys);
-        List<int> verts = polys.GetUniqueVertices();
-        //Calculate the average center of all the vertices
-        //in these Polygons.
-        Vector3 center = Vector3.zero;
-        foreach (int vert in verts)
-            center += m_Vertices[vert];
-        center /= verts.Count;
-        // Pull each vertex towards the center, then correct
-        // it's height so that it's as far from the center of
-        // the planet as it was before.
-        foreach (int vert in verts)
-        {
-            Vector3 v = m_Vertices[vert];
-            float height = v.magnitude;
-            v = Vector3.Lerp(v, center, interpolation);
-            v = v.normalized * height;
-            m_Vertices[vert] = v;
-        }
-        return stitchedPolys;
-    }
+    // public PolySet Inset(PolySet polys, float interpolation)
+    // {
+    //     PolySet stitchedPolys = StitchPolys(polys);
+    //     List<int> verts = polys.GetUniqueVertices();
+    //     //Calculate the average center of all the vertices
+    //     //in these Polygons.
+    //     Vector3 center = Vector3.zero;
+    //     foreach (int vert in verts)
+    //         center += m_Vertices[vert];
+    //     center /= verts.Count;
+    //     // Pull each vertex towards the center, then correct
+    //     // it's height so that it's as far from the center of
+    //     // the planet as it was before.
+    //     foreach (int vert in verts)
+    //     {
+    //         Vector3 v = m_Vertices[vert];
+    //         float height = v.magnitude;
+    //         v = Vector3.Lerp(v, center, interpolation);
+    //         v = v.normalized * height;
+    //         m_Vertices[vert] = v;
+    //     }
+    //     return stitchedPolys;
+    // }
 
     public PolySet Extrude(PolySet polys, float height)
     {
