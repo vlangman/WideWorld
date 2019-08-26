@@ -50,7 +50,7 @@ public class Planet : MonoBehaviour
     // These public parameters can be tweaked to give different styles to your planet.
 
     public Material m_Material;
-    public GameObject location;
+    public GameObject _nodePrefab;
 
     public int m_NumberOfContinents = 5;
     public float m_ContinentSizeMax = 1.0f;
@@ -83,8 +83,12 @@ public class Planet : MonoBehaviour
 
     PolySet water = new PolySet();
 
+    NodeController m_nodeController;
+
     public void Start()
     {
+
+        m_nodeController = new NodeController();
         // Create an icosahedron, subdivide it three times so that we have plenty of polys
         // to work with.
         CreateIcoSphere();
@@ -150,7 +154,7 @@ public class Planet : MonoBehaviour
 
         GenerateMesh();
         GetWaterPolygons();
-        SpawnShops(water);
+        SpawnNodes(water);
     }
 
     public void Update()
@@ -352,9 +356,9 @@ public class Planet : MonoBehaviour
         return true;
     }
 
-    public void SpawnShops(PolySet water)
+    public void SpawnNodes(PolySet water)
     {
-        List<Vector3> shops = new List<Vector3>();
+        List<Vector3> spawnPoints = new List<Vector3>();
         List<Polygon> _water = new List<Polygon>(water);
         for (int i = 0; i < m_NumberOfShops; i++)
         {
@@ -366,9 +370,9 @@ public class Planet : MonoBehaviour
             Vector3 normal = Vector3.Cross(ab, ac).normalized;
 
             Vector3 shopToPlace = m_PlanetMesh.transform.TransformPoint(normal);
-            if (checkShopDistance(shopToPlace, shops))
+            if (checkShopDistance(shopToPlace, spawnPoints))
             {
-                shops.Add(shopToPlace);
+                spawnPoints.Add(shopToPlace);
             }
             else
             {
@@ -377,34 +381,8 @@ public class Planet : MonoBehaviour
 
         }
 
-        for (int i = 0; i < m_NumberOfShops; i++)
-        {
-            Object.Instantiate(location, shops[i], new Quaternion(0, 0, 0, 0), m_PlanetMesh.transform);
-        }
-
-        // Mesh mesh = m_PlanetMesh.GetComponent<MeshFilter>().mesh;
-        // Vector3[] verts = mesh.vertices;
-        // Vector3 worldPt = transform.TransformPoint(verts[0]);
-
-        // Object.Instantiate(location, worldPt, new Quaternion(0,0,0,0) ,m_PlanetMesh.transform);
-
-        // // foreach (Polygon poly in m_Polygons)
-        // // {
-        // //     if (!hillPolys.Contains(poly) && !landPolys.Contains(poly)){
-        // //         p
-        // //     }
-        // // }
-
+        m_nodeController.GenerateNodes(_nodePrefab,spawnPoints, m_PlanetMesh.transform );
     }
-    // public void RandomizeTerrain()
-    // {
-
-    //    List<int> terrainverts = landPolys.GetUniqueVertices();
-
-    //    foreach(int v in terrainverts){
-    //        v
-    //    }
-    // }
 
     public List<int> GetUniqueVertices()
     {

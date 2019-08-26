@@ -39,7 +39,7 @@ public class MovePlanet : MonoBehaviour
             rotate = true;
         if (Input.GetMouseButtonUp(0))
             rotate = false;
-    }   
+    }
 
     void LateUpdate () 
     {
@@ -56,7 +56,7 @@ public class MovePlanet : MonoBehaviour
             {
                 distance -=  hit.distance;
             }
-        
+
             Vector3 position = rotation * negDistance + _planet.position;
  
             transform.rotation = rotation;
