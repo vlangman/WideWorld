@@ -307,7 +307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0d3992ff71e8284dbf0217395cf7b3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _planet: {fileID: 0}
+  _planet: {fileID: 1612003406}
   distance: 5
   xSpeed: 120
   ySpeed: 120
@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: f751fa7498be3a748bb21a28e7619879, type: 2}
-  location: {fileID: 2517787527540502993, guid: a78c01a234e54d345a5c333fff50b5a1,
+  _nodePrefab: {fileID: 2517787527540502993, guid: a78c01a234e54d345a5c333fff50b5a1,
     type: 3}
   m_NumberOfContinents: 3
   m_ContinentSizeMax: 1
