@@ -169,7 +169,7 @@ GameObject:
   - component: {fileID: 1486928212518550845}
   - component: {fileID: 3592450536980737497}
   - component: {fileID: 5822132532520764609}
-  - component: {fileID: 6327009696351693467}
+  - component: {fileID: 843051299}
   m_Layer: 5
   m_Name: PanelInformation (1)
   m_TagString: Untagged
@@ -230,7 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: a2c61c6caf133eb43a9b68a53e67a41f, type: 2}
+  m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0.392}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6327009696351693467
+--- !u!114 &843051299
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -257,7 +257,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3479321988662502926}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b254379740588f54697cb698f1ff7cff, type: 3}
+  m_Script: {fileID: 11500000, guid: 1baaa5079010e114a80940864c850f70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}

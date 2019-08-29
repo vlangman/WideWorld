@@ -30,6 +30,7 @@ public class ScriptEventShopkeeper : MonoBehaviour
     // Update is called once per frame
     public void ClickButtonBuySupplies()
     {
+        Debug.Log("HOOPA");
         player.GetComponent<PlayerScript>().food += (int)foodSlider.value;
         foodStock -= (int)foodSlider.value;
         player.GetComponent<PlayerScript>().water += (int)waterSlider.value;
