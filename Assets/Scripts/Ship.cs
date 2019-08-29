@@ -129,6 +129,7 @@ public class Ship
         _name = name;
         _weapons = new List<Weapon>();
         _popupController = new PopupController();
+        isAlive = true;
 
     }
 
@@ -143,7 +144,8 @@ public class Ship
         {
             if ((Damage - _resistance) > 0.0f){
                 Debug.Log(_name + " TAKES " + (Damage - _resistance).ToString() + " DAMAGE");
-                _popupController.Popup(ABILITIES.NONE,0,0, _name + " TAKES " + (Damage - _resistance).ToString() + " DAMAGE");
+                _popupController.CreatePopup(ABILITIES.NONE,0, _name + " TAKES " + (Damage - _resistance).ToString() + " DAMAGE");
+                
                 _health -= (Damage - _resistance);
             } 
             else{
@@ -169,6 +171,7 @@ public class Ship
         }
         if (_health <= 0)
         {
+            isAlive = false;
             Debug.Log("DEAD AF SUN!");
         }
         _dodgeEnabled = false;

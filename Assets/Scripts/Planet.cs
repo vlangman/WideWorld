@@ -161,22 +161,17 @@ public class Planet : MonoBehaviour
         GetWaterPolygons();
         SpawnNodes(water);
     }
-    private bool _battle = false;
-
     public void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.Space) && _battle )
-        {
-            _currBattle.StartNextRound();
-        }
-        if (_battle)
-        {
-            if(_currBattle.Update()){
-                 _battle = false;
+        if (_currBattle!= null){
+            if (_currBattle.Update())
+            {
+                //update own synet for testing
+                _skyNet.update(_currBattle);
+            }else{
+                Object.Destroy(_currBattle);
             }
-            //update own synet for testing
-            _skyNet.update(_currBattle);
         }
         else
         {
@@ -195,7 +190,6 @@ public class Planet : MonoBehaviour
                     _currBattle =  ScriptableObject.CreateInstance<Battle>();
                     _currBattle.StartBattle(_playerShip);
                     clicked._gameObject.GetComponent<MeshRenderer>().material.color = Color.magenta;
-                    _battle = true;
                 }
             }
             

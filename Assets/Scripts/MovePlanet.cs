@@ -63,12 +63,10 @@ public class MovePlanet : MonoBehaviour
             transform.position = position;
         }
         
-        distance = distance - Input.GetAxis("Mouse ScrollWheel")*3;
-        if (distance < distanceMin){
-            distance = distanceMin;
-        }else if(distance > distanceMax){
-            distance = distanceMax;
-        }
+        // distance = distance - Input.GetAxis("Mouse ScrollWheel")*3;
+      
+        distance = distanceMin;
+     
     }
 
 }

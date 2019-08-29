@@ -25,8 +25,10 @@ public class SkyNet
 
     public void GenerateMoveList()
     {
+        int  index = 0;
         foreach (Crew _man in _ship._crew)
         {
+            
             //gen list of moves per crew member
             ABILITIES move = (ABILITIES)Random.Range(0, 3);
             int wIndex = -1;
@@ -34,7 +36,8 @@ public class SkyNet
             {
                 wIndex = Random.Range(0, _ship._weapons.Count);
             }
-            _currentSet.Add(new Move(move, wIndex));
+            _currentSet.Insert(index,new Move(move, wIndex));
+            index++;
         }
         _ship._turnMoves = _currentSet;
     }
@@ -52,10 +55,11 @@ public class SkyNet
 
     public void update(Battle _currentBattle)
     {
-        if (_ship._health < _currentBattle._ship._health)
-        {
-            GenerateMoveList();
-        }
+        GenerateMoveList();
+        // if (_ship._health < _currentBattle._ship._health)
+        // {
+        //     GenerateMoveList();
+        // }
     }
 
     public void ApplyLevelModifier()
@@ -85,8 +89,7 @@ public class Battle : ScriptableObject
     public SkyNet _skyNet;
     public Ship _ship;
 
-    bool _startBattle = false;
-    bool _battleOver = false;
+    bool _battleActive = false;
     bool _nextRound = false;
     int turnIndex = 0;
 
@@ -103,13 +106,13 @@ public class Battle : ScriptableObject
         //set targets 
         _enemy._target = _ship;
         _ship._target = _enemy;
-        _startBattle = true;
+        _battleActive = true;
     }
 
 
     public void StartNextRound()
     {
-        _nextRound = true;
+      
     }
 
     // Start is called before the first frame update
@@ -121,74 +124,86 @@ public class Battle : ScriptableObject
     // Update is called once per frame
     public bool Update()
     {
-        if (_startBattle && !_battleOver)
+
+        if (Input.GetKeyDown(KeyCode.Space) && _battleActive)
         {
-            if (_nextRound)
+            _nextRound = true;
+        }
+
+        if (_nextRound)
+        {
+            int MaxTurnsPerRound = _ship._crew.Count > _enemy._crew.Count ? _ship._crew.Count - 1 : _enemy._crew.Count - 1;
+            if (turnIndex <= MaxTurnsPerRound)
             {
-                int MaxTurnsPerRound = _ship._crew.Count > _enemy._crew.Count ? _ship._crew.Count - 1 : _enemy._crew.Count - 1;
-                if (turnIndex <= MaxTurnsPerRound)
+                //ship turn first (player)
+                Move shipMove;
+                if (turnIndex <= _ship._turnMoves.Count)
                 {
-                    //ship turn first (player)
-                    Move shipMove;
-                    if (turnIndex <= _ship._turnMoves.Count)
-                    {
-                        shipMove = _ship._turnMoves[turnIndex];
-                    }
-                    else
-                    {
-                        shipMove = new Move(ABILITIES.NONE, 0);
-                    }
-                    //enemy turn second (
-
-                    Move enemyMove;
-                    if (turnIndex <= _enemy._turnMoves.Count)
-                    {
-                        enemyMove = _enemy._turnMoves[turnIndex];
-                    }
-                    else
-                    {
-                        enemyMove = new Move(ABILITIES.NONE, 0);
-                    }
-
-                    _ship.ExecuteTurn(turnIndex);
-                    _enemy.ExecuteTurn(turnIndex);
-
-                    _ship.update();
-                    _enemy.update();
-                    _skyNet.update(this);
-                    turnIndex++;
+                    shipMove = _ship._turnMoves[turnIndex];
                 }
                 else
                 {
-                    turnIndex = 0;
-                    _nextRound = false;
+                    shipMove = new Move(ABILITIES.NONE, 0);
                 }
-               
+                //enemy turn second (
+
+                Move enemyMove;
+                if (turnIndex <= _enemy._turnMoves.Count)
+                {
+                    enemyMove = _enemy._turnMoves[turnIndex];
+                }
+                else
+                {
+                    enemyMove = new Move(ABILITIES.NONE, 0);
+                }
+
+                _ship.ExecuteTurn(turnIndex);
+                _enemy.ExecuteTurn(turnIndex);
+
+                _ship.update();
+                _enemy.update();
+                _skyNet.update(this);
+                turnIndex++;
             }
+            else
+            {
+                turnIndex = 0;
+                _nextRound = false;
+            }
+
         }
-        //when battle over 
-        return _battleOver;
+        if (!_ship.isAlive || !_enemy.isAlive)
+        {
+            _battleActive = false;
+        }
+
+        return _battleActive;
 
     }
 
 }
 
-   public class _battlePopupTimer: MonoBehaviour{
-        float timer = 0.0f;
-         
+public class _battlePopupTimer : MonoBehaviour
+{
+    float timer = 0.0f;
 
-        public void UpdateTimer(){
-            timer+= Time.deltaTime;
-        }
 
-        public void ResetTimer(){
-            timer = 0.0f;
-        }
-
-        public bool CheckTimer(float time){
-            if (timer <= time){
-                return true;
-            }
-            return false;
-        }
+    public void UpdateTimer()
+    {
+        timer += Time.deltaTime;
     }
+
+    public void ResetTimer()
+    {
+        timer = 0.0f;
+    }
+
+    public bool CheckTimer(float time)
+    {
+        if (timer <= time)
+        {
+            return true;
+        }
+        return false;
+    }
+}

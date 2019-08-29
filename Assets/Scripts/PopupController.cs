@@ -19,10 +19,11 @@ public class PopupController
         
     }
 
-   public void Popup(ABILITIES _ability = ABILITIES.NONE, float damage = 0, float defend = 0, string message = ""){
+   public void CreatePopup(ABILITIES _ability = ABILITIES.NONE, int value = 0, string message = ""){
        GameObject _popupObject;
        if (_ability == ABILITIES.ATTACK){
             _popupObject = Object.Instantiate(_attackPrefab, Vector3.zero, Quaternion.identity);
+            _popupObject.GetComponent<Popup>().Setup(_popupObject,1.0f);
        }
        if (_ability == ABILITIES.DEFEND){
             _popupObject = Object.Instantiate(_defendPrefab, Vector3.zero, Quaternion.identity);
@@ -31,8 +32,9 @@ public class PopupController
             _popupObject = Object.Instantiate(_dodgePrefab, Vector3.zero, Quaternion.identity);
        }
        if (_ability == ABILITIES.NONE){
-            Text _text = _messagePrefab.GetComponent<Text>();
-            _text.text = message;
+            _messagePrefab.GetComponent<Popup>().Setup(_messagePrefab,1.0f);
        }
    }
 }
+
+
