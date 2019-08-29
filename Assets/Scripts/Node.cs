@@ -7,23 +7,22 @@ public enum NODE_TYPES{
     BATTLE
 }
 
-public class Node : MonoBehaviour
+public class Node
 {
-    private NODE_TYPES _nodeType{get; set;}
-    private bool _visited {get; set;}
+    public GameObject _gameObject;
+    public NODE_TYPES _nodeType;
+    public bool _visited;
 
-    private List<Node> _neighbours;
+    public List<Node> _neighbours;
 
     public Node(NODE_TYPES type){
         _nodeType = type;
     }
 
-    public void Start(){
-
-    }
-
-    public void Update(){
-
+    public Node(Node newNode){
+         _nodeType = newNode._nodeType;
+         _gameObject = newNode._gameObject;
+         _visited = newNode._visited;
     }
 
 }

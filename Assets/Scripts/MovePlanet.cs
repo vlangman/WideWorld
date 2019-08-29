@@ -16,7 +16,7 @@ public class MovePlanet : MonoBehaviour
     public float distanceMin = 3.0f;
     public float distanceMax = 11.0f;
  
-    private Rigidbody rigidbody;
+    public Rigidbody rigidbody;
  
     float x = 0.0f;
     float y = 0.0f;

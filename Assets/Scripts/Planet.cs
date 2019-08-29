@@ -63,7 +63,7 @@ public class Planet : MonoBehaviour
     public float m_HillSizeMin = 0.1f;
 
     public int m_NumberOfShops = 5;
-    public float m_shopRangeMin = 5.0f;
+    public float m_shopRangeMin = 3.0f;
 
 
     // Internally, the Planet object stores its mesh as a child GameObject:
@@ -85,10 +85,15 @@ public class Planet : MonoBehaviour
 
     NodeController m_nodeController;
 
+    private SkyNet _skyNet;
+    private Ship _playerShip;
+
+    private Battle _currBattle;
+
     public void Start()
     {
 
-        m_nodeController = new NodeController();
+        m_nodeController = ScriptableObject.CreateInstance<NodeController>();
         // Create an icosahedron, subdivide it three times so that we have plenty of polys
         // to work with.
         CreateIcoSphere();
@@ -156,15 +161,46 @@ public class Planet : MonoBehaviour
         GetWaterPolygons();
         SpawnNodes(water);
     }
+    private bool _battle = false;
 
     public void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && _battle )
         {
-            m_PlanetMesh.transform.rotation *= Quaternion.AngleAxis(60, Vector3.up);
+            _currBattle.StartNextRound();
         }
-        m_PlanetMesh.transform.rotation = Quaternion.Lerp(transform.rotation, m_PlanetMesh.transform.rotation, 10 * 1.0f * Time.deltaTime);
+        if (_battle)
+        {
+            if(_currBattle.Update()){
+                 _battle = false;
+            }
+            //update own synet for testing
+            _skyNet.update(_currBattle);
+        }
+        else
+        {
+            Node clicked = m_nodeController.checkNodes();
+            if (clicked != null)
+            {
+                //freezeplanet movement;
+                if (clicked._nodeType == NODE_TYPES.BATTLE)
+                {
+                    _playerShip = new Ship("PLAYER", 20.0f, 5.0f, 1.0f);
+                    _playerShip.AddWeapon(new Weapon(WEAPONS_TYPE.CANNON, EFFECT_TYPE.NONE));
+                    _playerShip.AddWeapon(new Weapon(WEAPONS_TYPE.CANNON, EFFECT_TYPE.NONE));
+                    _playerShip._level = 1;
+
+                    _skyNet = new SkyNet(ref _playerShip, _playerShip._level);
+                    _currBattle =  ScriptableObject.CreateInstance<Battle>();
+                    _currBattle.StartBattle(_playerShip);
+                    clicked._gameObject.GetComponent<MeshRenderer>().material.color = Color.magenta;
+                    _battle = true;
+                }
+            }
+            
+        }
+
     }
 
 
@@ -377,11 +413,12 @@ public class Planet : MonoBehaviour
             else
             {
                 i--;
+                m_shopRangeMin -= 0.02f;
             }
 
         }
 
-        m_nodeController.GenerateNodes(_nodePrefab,spawnPoints, m_PlanetMesh.transform );
+        m_nodeController.GenerateNodes(_nodePrefab, spawnPoints, m_PlanetMesh.transform);
     }
 
     public List<int> GetUniqueVertices()
